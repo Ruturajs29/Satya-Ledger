@@ -1,0 +1,38 @@
+{
+  "name": "satya-ledger",
+  "version": "1.0.0",
+  "description": "Decentralized Digital Receipt System for Government Transactions",
+  "main": "index.js",
+  "scripts": {
+    "compile": "truffle compile",
+    "migrate": "truffle migrate --reset",
+    "deploy": "node scripts/deploy.js",
+    "create": "node scripts/createTx.js",
+    "approve": "node scripts/approveTx.js",
+    "view": "node scripts/viewTx.js",
+    "serve": "http-server -p 8000",
+    "test": "truffle test"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "smart-contracts",
+    "government",
+    "transparency",
+    "decentralized"
+  ],
+  "author": "SatyaLedger Team",
+  "license": "MIT",
+  "dependencies": {
+    "@truffle/contract": "^4.6.31",
+    "@truffle/hdwallet-provider": "^2.0.16",
+    "web3": "^4.16.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "truffle": "^5.5.7"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

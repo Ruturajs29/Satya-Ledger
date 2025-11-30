@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+package-lock.json
+Doc
+
+# Build files
+build/
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Private keys and sensitive data
+*.key
+*.pem
+secrets/
+private/
+keys/
+wallets/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Truffle
+.truffle/
+
+# Coverage
+coverage/
+coverage.json
+
+# Temporary files
+*.tmp
+*.temp
+
+# Personal notes and documents
+NOTES.md
+personal/
+drafts/

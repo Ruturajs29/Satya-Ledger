@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welfare Ministry - SatyaLedger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-role {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .btn-logout {
+            padding: 8px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #c82333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .ministry-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .transaction-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .tx-item {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .tx-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .tx-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .tx-id {
+            font-family: monospace;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-brand">🏛️ SatyaLedger</div>
+        <div class="navbar-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Welfare Ministry</div>
+                <div class="user-role">Transaction Creator</div>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>📝 Welfare Ministry Dashboard</h1>
+            <p>Create and track subsidy transactions</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCreated">0</div>
+                <div class="stat-label">Total Created</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pendingCount">0</div>
+                <div class="stat-label">Pending Approval</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="approvedCount">0</div>
+                <div class="stat-label">Approved</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom: 20px; color: #333;">📝 Create New Transaction</h2>
+
+            <div class="info-box">
+                <strong>ℹ️ Instructions:</strong><br>
+                • Fill in beneficiary and scheme details below<br>
+                • Receipt hash will be auto-generated for verification<br>
+                • Transaction requires approval from ALL 3 other ministries<br>
+                • Track created transactions in the history section below
+            </div>
+
+            <div class="form-group" style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <strong>🏛️ Creating as: <span class="ministry-badge">Welfare Ministry</span></strong><br>
+                <small>Address: <span id="ministryAddress" style="font-family: monospace;">0xb2eA23Ad706B701a359aDc5DAC5A7E7a8FEe96b0</span></small>
+            </div>
+
+            <form id="txForm">
+                <div class="form-group">
+                    <label for="beneficiaryId">Beneficiary ID *</label>
+                    <input type="text" id="beneficiaryId" placeholder="e.g., BEN001" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="schemeName">Scheme Name *</label>
+                    <select id="schemeName" required>
+                        <option value="">-- Select Scheme --</option>
+                        <option value="PM-KISAN">PM-KISAN (Agriculture Subsidy)</option>
+                        <option value="National-Scholarship">National Scholarship</option>
+                        <option value="PMAY">Pradhan Mantri Awas Yojana</option>
+                        <option value="Ayushman-Bharat">Ayushman Bharat</option>
+                        <option value="MGNREGA">MGNREGA</option>
+                        <option value="Ration-Card">Ration Card Subsidy</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount (INR) *</label>
+                    <input type="number" id="amount" placeholder="e.g., 5000" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="receiptHash">Receipt Hash (auto-generated)</label>
+                    <input type="text" id="receiptHash" placeholder="Will be generated automatically" readonly>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">Create Transaction</button>
+            </form>
+
+            <div id="result" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom: 20px; color: #333;">📜 Recent Transactions</h2>
+            <div class="transaction-history" id="transactionHistory">
+                <p style="text-align: center; color: #999; padding: 30px;">No transactions created yet</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    <script>
+        const WELFARE_MINISTRY = "0xb2eA23Ad706B701a359aDc5DAC5A7E7a8FEe96b0";
+        const CONTRACT_ADDRESS = "0xA33e479090a4858951ceCD3d62071B15E0a29291";
+        
+        let web3;
+        let contract;
+
+        // Contract ABI
+        const contractABI = [
+            {
+                "inputs": [
+                    {"internalType": "string", "name": "_beneficiaryId", "type": "string"},
+                    {"internalType": "string", "name": "_schemeName", "type": "string"},
+                    {"internalType": "uint256", "name": "_amount", "type": "uint256"},
+                    {"internalType": "string", "name": "_receiptHash", "type": "string"}
+                ],
+                "name": "createTransaction",
+                "outputs": [{"internalType": "bytes32", "name": "", "type": "bytes32"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {"indexed": true, "internalType": "bytes32", "name": "txId", "type": "bytes32"},
+                    {"indexed": false, "internalType": "string", "name": "schemeName", "type": "string"},
+                    {"indexed": true, "internalType": "address", "name": "createdBy", "type": "address"},
+                    {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+                ],
+                "name": "TransactionCreated",
+                "type": "event"
+            }
+        ];
+
+        // Check authentication
+        function checkAuth() {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('userType') !== 'welfare') {
+                window.location.href = 'login.html';
+                return false;
+            }
+            document.getElementById('userName').textContent = sessionStorage.getItem('userName');
+            return true;
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Initialize Web3
+        async function initWeb3() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    await ethereum.request({ method: 'eth_requestAccounts' });
+                    contract = new web3.eth.Contract(contractABI, CONTRACT_ADDRESS);
+                    loadTransactionHistory();
+                } catch (error) {
+                    showResult('error', 'Failed to connect to MetaMask: ' + error.message);
+                }
+            } else {
+                showResult('error', '⚠️ MetaMask not detected. Please install MetaMask.');
+            }
+        }
+
+        // Generate receipt hash
+        function generateReceiptHash(data) {
+            const str = JSON.stringify(data) + Date.now();
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return '0x' + Math.abs(hash).toString(16).padStart(64, '0');
+        }
+
+        // Handle form submission
+        document.getElementById('txForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Transaction...';
+
+            try {
+                const beneficiaryId = document.getElementById('beneficiaryId').value.trim();
+                const schemeName = document.getElementById('schemeName').value;
+                const amount = document.getElementById('amount').value;
+
+                // Generate receipt hash
+                const receiptData = { beneficiaryId, schemeName, amount, timestamp: Date.now() };
+                const receiptHash = generateReceiptHash(receiptData);
+                document.getElementById('receiptHash').value = receiptHash;
+
+                // Create transaction
+                console.log("getting results\n");
+                const result = await contract.methods
+                    .createTransaction(beneficiaryId, schemeName, amount, receiptHash)
+                    .send({ from: WELFARE_MINISTRY, gas: 500000 });
+                console.log("results" , result);
+                // Get transaction ID from event
+                const txId = result.events.TransactionCreated.returnValues.txId;
+
+                // Store in local storage
+                const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+                transactions.push({
+                    txId,
+                    beneficiaryId,
+                    schemeName,
+                    amount,
+                    receiptHash,
+                    timestamp: Date.now(),
+                    status: 'Pending',
+                    approvals: 0
+                });
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+
+                showResult('success', `
+                    <h3>✅ Transaction Created Successfully!</h3>
+                    <p><strong>Transaction ID:</strong> <span style="font-family: monospace;">${txId}</span></p>
+                    <p><strong>Beneficiary:</strong> ${beneficiaryId}</p>
+                    <p><strong>Scheme:</strong> ${schemeName}</p>
+                    <p><strong>Amount:</strong> ₹${amount}</p>
+                    <p><strong>Status:</strong> Pending (Awaiting 3 approvals from other ministries)</p>
+                `);
+
+                // Reset form and reload history
+                document.getElementById('txForm').reset();
+                loadTransactionHistory();
+
+            } catch (error) {
+                showResult('error', `❌ Transaction Failed: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Transaction';
+            }
+        });
+
+        function loadTransactionHistory() {
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            const historyDiv = document.getElementById('transactionHistory');
+
+            if (transactions.length === 0) {
+                historyDiv.innerHTML = '<p style="text-align: center; color: #999; padding: 30px;">No transactions created yet</p>';
+                return;
+            }
+
+            let pending = 0, approved = 0;
+
+            historyDiv.innerHTML = transactions.reverse().map(tx => {
+                const isApproved = tx.approvals >= 3;
+                if (isApproved) approved++; else pending++;
+
+                return `
+                    <div class="tx-item">
+                        <div class="tx-header">
+                            <div>
+                                <strong>${tx.schemeName}</strong><br>
+                                <span class="tx-id">ID: ${tx.txId}</span>
+                            </div>
+                            <span class="status-badge ${isApproved ? 'status-approved' : 'status-pending'}">
+                                ${isApproved ? '✅ Approved' : '⏳ Pending'}
+                            </span>
+                        </div>
+                        <div style="color: #666; font-size: 0.9em;">
+                            <strong>Beneficiary:</strong> ${tx.beneficiaryId} | 
+                            <strong>Amount:</strong> ₹${tx.amount} |
+                            <strong>Approvals:</strong> ${tx.approvals}/3
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('totalCreated').textContent = transactions.length;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('approvedCount').textContent = approved;
+        }
+
+        function showResult(type, message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result ' + type;
+            resultDiv.innerHTML = message;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Initialize
+        if (checkAuth()) {
+            window.addEventListener('load', initWeb3);
+            loadTransactionHistory();
+        }
+    </script>
+</body>
+</html>

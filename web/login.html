@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SatyaLedger - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .login-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-left h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .login-left p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+
+        .features {
+            margin-top: 20px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .feature::before {
+            content: "✓";
+            background: rgba(255,255,255,0.2);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .login-right {
+            padding: 60px 40px;
+        }
+
+        .login-right h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .login-right .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .credentials-info {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .credentials-info h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .credentials-info ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .credentials-info li {
+            margin-bottom: 5px;
+        }
+
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+            }
+
+            .login-left {
+                padding: 40px 30px;
+            }
+
+            .login-right {
+                padding: 40px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <h1>🔐 SatyaLedger</h1>
+            <p>Transparent Government Subsidy Management on Blockchain</p>
+            
+            <div class="features">
+                <div class="feature">Secure blockchain-based transactions</div>
+                <div class="feature">Multi-ministry approval system</div>
+                <div class="feature">Public transaction verification</div>
+                <div class="feature">Complete transparency & accountability</div>
+            </div>
+        </div>
+
+        <div class="login-right">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Sign in to your dashboard</p>
+
+            <div class="error-msg" id="errorMsg"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="userType">Select User Type</label>
+                    <select id="userType" required>
+                        <option value="">-- Select User Type --</option>
+                        <option value="welfare">Welfare Ministry</option>
+                        <option value="finance">Finance Ministry</option>
+                        <option value="health">Health Ministry</option>
+                        <option value="education">Education Ministry</option>
+                        <option value="public">Public User</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+
+                <button type="submit" class="btn-login">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Mock user credentials
+        const MOCK_USERS = {
+            welfare: {
+                username: 'welfare',
+                password: 'welfare123',
+                dashboard: 'welfare-dashboard.html',
+                address: '0xb2eA23Ad706B701a359aDc5DAC5A7E7a8FEe96b0',
+                name: 'Welfare Ministry'
+            },
+            finance: {
+                username: 'finance',
+                password: 'finance123',
+                dashboard: 'finance-dashboard.html',
+                address: '0xdeF7c520781D097D23f20563111C266630e8Fe7f',
+                name: 'Finance Ministry'
+            },
+            health: {
+                username: 'health',
+                password: 'health123',
+                dashboard: 'health-dashboard.html',
+                address: '0x76F52BE2B49cc3466897865fa488dCa8B5cBa33b',
+                name: 'Health Ministry'
+            },
+            education: {
+                username: 'education',
+                password: 'education123',
+                dashboard: 'education-dashboard.html',
+                address: '0xE7C431244397bc4DB389806d4931e16B978fC23F',
+                name: 'Education Ministry'
+            },
+            public: {
+                username: 'citizen',
+                password: 'citizen123',
+                dashboard: 'public-dashboard.html',
+                name: 'Public User'
+            }
+        };
+
+        const loginForm = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('errorMsg');
+        const userTypeSelect = document.getElementById('userType');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        // Auto-fill credentials when user type is selected
+        userTypeSelect.addEventListener('change', function() {
+            const userType = this.value;
+            if (userType && MOCK_USERS[userType]) {
+                usernameInput.value = MOCK_USERS[userType].username;
+                passwordInput.value = MOCK_USERS[userType].password;
+            }
+        });
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const userType = userTypeSelect.value;
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            // Validate credentials
+            if (!userType) {
+                showError('Please select a user type');
+                return;
+            }
+
+            const user = MOCK_USERS[userType];
+            if (username === user.username && password === user.password) {
+                // Store session data
+                sessionStorage.setItem('userType', userType);
+                sessionStorage.setItem('userName', user.name);
+                sessionStorage.setItem('userAddress', user.address || '');
+                sessionStorage.setItem('isLoggedIn', 'true');
+
+                // Redirect to appropriate dashboard
+                window.location.href = user.dashboard;
+            } else {
+                showError('Invalid username or password');
+            }
+        });
+
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 3000);
+        }
+
+        // Check if already logged in
+        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+            const userType = sessionStorage.getItem('userType');
+            if (userType && MOCK_USERS[userType]) {
+                window.location.href = MOCK_USERS[userType].dashboard;
+            }
+        }
+    </script>
+</body>
+</html>

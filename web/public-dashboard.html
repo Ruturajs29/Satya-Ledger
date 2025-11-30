@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Dashboard - SatyaLedger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-role {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .btn-logout {
+            padding: 8px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #c82333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .tx-details {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .detail-value {
+            color: #333;
+            word-break: break-all;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 15px 0;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            transition: width 0.5s;
+        }
+
+        .voting-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        .voting-table th,
+        .voting-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .voting-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .vote-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .vote-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .vote-pending {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .receipt-link {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .detail-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-brand">🏛️ SatyaLedger</div>
+        <div class="navbar-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Public User</div>
+                <div class="user-role">Transaction Verification</div>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Public Verification Portal</h1>
+            <p>Verify government subsidy transactions on the blockchain</p>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom: 20px; color: #333;">🔍 Verify Transaction</h2>
+
+            <div class="info-box">
+                <strong>ℹ️ About Transaction Verification:</strong><br>
+                • Enter the Transaction ID to verify any government subsidy transaction<br>
+                • View complete transaction details including beneficiary and scheme information<br>
+                • Check approval status from all ministries<br>
+                • Verify receipt authenticity using the blockchain hash<br><br>
+                <strong>🔒 Transparency:</strong> All approved transactions are publicly verifiable on the blockchain
+            </div>
+
+            <form id="verifyForm">
+                <div class="form-group">
+                    <label for="txId">Transaction ID *</label>
+                    <input type="text" id="txId" placeholder="Enter transaction ID (e.g., 0x123abc...)" required>
+                </div>
+
+                <button type="submit" class="btn" id="verifyBtn">🔍 Verify Transaction</button>
+            </form>
+
+            <div id="result" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom: 20px; color: #333;">📊 All Transactions</h2>
+            <div id="allTransactions">
+                <p style="text-align: center; color: #999; padding: 30px;">Loading transactions...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    <script>
+        const CONTRACT_ADDRESS = "0xA33e479090a4858951ceCD3d62071B15E0a29291";
+        
+        let web3;
+        let contract;
+
+        // Ministry addresses and names
+        const MINISTRIES = {
+            "0xdeF7c520781D097D23f20563111C266630e8Fe7f": "Finance Ministry",
+            "0xb2eA23Ad706B701a359aDc5DAC5A7E7a8FEe96b0": "Welfare Ministry",
+            "0x76F52BE2B49cc3466897865fa488dCa8B5cBa33b": "Health Ministry",
+            "0xE7C431244397bc4DB389806d4931e16B978fC23F": "Education Ministry"
+        };
+
+        // Contract ABI
+        const contractABI = [
+            {
+                "inputs": [{"internalType": "bytes32", "name": "_txId", "type": "bytes32"}],
+                "name": "getTransaction",
+                "outputs": [
+                    {"internalType": "string", "name": "beneficiaryId", "type": "string"},
+                    {"internalType": "string", "name": "schemeName", "type": "string"},
+                    {"internalType": "uint256", "name": "amount", "type": "uint256"},
+                    {"internalType": "string", "name": "receiptHash", "type": "string"},
+                    {"internalType": "address", "name": "createdBy", "type": "address"},
+                    {"internalType": "uint256", "name": "timestamp", "type": "uint256"},
+                    {"internalType": "string", "name": "status", "type": "string"},
+                    {"internalType": "uint8", "name": "approvals", "type": "uint8"},
+                    {"internalType": "bool", "name": "finalized", "type": "bool"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {"internalType": "bytes32", "name": "_txId", "type": "bytes32"},
+                    {"internalType": "address", "name": "_ministry", "type": "address"}
+                ],
+                "name": "hasVoted",
+                "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // Check authentication
+        function checkAuth() {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('userType') !== 'public') {
+                window.location.href = 'login.html';
+                return false;
+            }
+            document.getElementById('userName').textContent = sessionStorage.getItem('userName');
+            return true;
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Initialize Web3
+        async function initWeb3() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    await ethereum.request({ method: 'eth_requestAccounts' });
+                    contract = new web3.eth.Contract(contractABI, CONTRACT_ADDRESS);
+                    loadAllTransactions();
+                } catch (error) {
+                    console.error('Failed to connect to MetaMask:', error);
+                    web3 = new Web3('http://127.0.0.1:7545');
+                    loadAllTransactions();
+                }
+            } else {
+                web3 = new Web3('http://127.0.0.1:7545');
+                loadAllTransactions();
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const verifyBtn = document.getElementById('verifyBtn');
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Verifying...';
+
+            try {
+                const txId = document.getElementById('txId').value.trim();
+                await verifyTransaction(txId);
+            } catch (error) {
+                showError('Failed to verify transaction: ' + error.message);
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = '🔍 Verify Transaction';
+            }
+        });
+
+        async function verifyTransaction(txId) {
+            // Get transaction from localStorage
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            const tx = transactions.find(t => t.txId === txId);
+
+            if (!tx) {
+                showError('Transaction not found. Please check the Transaction ID.');
+                return;
+            }
+
+            // Build voting status (mock for localStorage)
+            const voters = tx.voters || [];
+            const votingStatus = {};
+            for (const [address, name] of Object.entries(MINISTRIES)) {
+                const ministryKey = Object.keys(MINISTRIES).find(k => MINISTRIES[k] === name);
+                const ministryShort = name.split(' ')[0].toLowerCase();
+                votingStatus[address] = voters.includes(ministryShort);
+            }
+
+            displayTransaction(tx, votingStatus);
+        }
+
+        function displayTransaction(tx, votingStatus) {
+            const approvalPercent = (tx.approvals / 3) * 100;
+            const statusClass = tx.approvals >= 3 ? 'status-approved' : 'status-pending';
+            const statusIcon = tx.approvals >= 3 ? '✅' : '⏳';
+            const statusText = tx.approvals >= 3 ? 
+                `${statusIcon} APPROVED (All 3 ministries approved)` : 
+                `${statusIcon} PENDING (${tx.approvals}/3 approvals)`;
+
+            let votingTableHTML = '<table class="voting-table"><thead><tr><th>Ministry</th><th>Status</th></tr></thead><tbody>';
+            
+            for (const [address, name] of Object.entries(MINISTRIES)) {
+                const voted = votingStatus[address];
+                const voteClass = voted ? 'vote-approved' : 'vote-pending';
+                const voteText = voted ? '✅ Approved' : '⏳ Pending';
+                votingTableHTML += `
+                    <tr>
+                        <td>${name}</td>
+                        <td><span class="vote-status ${voteClass}">${voteText}</span></td>
+                    </tr>
+                `;
+            }
+            votingTableHTML += '</tbody></table>';
+
+            const createdDate = new Date(tx.timestamp).toLocaleString();
+
+            const resultHTML = `
+                <div class="tx-details">
+                    <div class="section-title">📄 Transaction Information</div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Transaction ID:</div>
+                        <div class="detail-value" style="font-family: monospace; font-size: 13px;">${tx.txId}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Status:</div>
+                        <div class="detail-value">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Beneficiary ID:</div>
+                        <div class="detail-value">${tx.beneficiaryId}</div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Scheme Name:</div>
+                        <div class="detail-value">${tx.schemeName}</div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Amount:</div>
+                        <div class="detail-value"><strong>₹${tx.amount.toLocaleString()}</strong></div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Receipt Hash:</div>
+                        <div class="detail-value" style="font-family: monospace; font-size: 12px;">${tx.receiptHash}</div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Created At:</div>
+                        <div class="detail-value">${createdDate}</div>
+                    </div>
+
+                    <div class="section-title">📊 Approval Progress</div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${approvalPercent}%">
+                            ${tx.approvals} / 3 Approvals
+                        </div>
+                    </div>
+
+                    <div class="section-title">🗳️ Ministry Voting Status</div>
+                    ${votingTableHTML}
+
+                    ${tx.approvals >= 3 ? `
+                        <div style="background: #d4edda; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: center;">
+                            <h3 style="color: #155724; margin-bottom: 10px;">🎉 Transaction Finalized!</h3>
+                            <p style="color: #155724;">This transaction has been approved by all required ministries.</p>
+                        </div>
+                    ` : `
+                        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: center;">
+                            <h3 style="color: #856404; margin-bottom: 10px;">⏳ Awaiting Approval</h3>
+                            <p style="color: #856404;">This transaction needs ${3 - tx.approvals} more approval(s) to be finalized.</p>
+                        </div>
+                    `}
+
+                    <div class="receipt-link">
+                        <p>📋 <strong>Receipt Hash Verified</strong></p>
+                        <p style="margin-top: 10px; font-size: 14px; color: #555;">
+                            This hash can be used to verify the authenticity of the off-chain receipt document.
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = resultHTML;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showError(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="error-message"><strong>❌ Error:</strong> ${message}</div>`;
+            resultDiv.style.display = 'block';
+        }
+
+        function loadAllTransactions() {
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            const allTxDiv = document.getElementById('allTransactions');
+
+            if (transactions.length === 0) {
+                allTxDiv.innerHTML = '<p style="text-align: center; color: #999; padding: 30px;">No transactions available yet</p>';
+                return;
+            }
+
+            allTxDiv.innerHTML = `
+                <table class="voting-table">
+                    <thead>
+                        <tr>
+                            <th>Scheme</th>
+                            <th>Beneficiary</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Approvals</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${transactions.map(tx => `
+                            <tr>
+                                <td><strong>${tx.schemeName}</strong></td>
+                                <td>${tx.beneficiaryId}</td>
+                                <td>₹${tx.amount.toLocaleString()}</td>
+                                <td>
+                                    <span class="vote-status ${tx.approvals >= 3 ? 'vote-approved' : 'vote-pending'}">
+                                        ${tx.approvals >= 3 ? '✅ Approved' : '⏳ Pending'}
+                                    </span>
+                                </td>
+                                <td>${tx.approvals}/3</td>
+                                <td>
+                                    <button onclick="quickVerify('${tx.txId}')" 
+                                            style="padding: 5px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                        View Details
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        async function quickVerify(txId) {
+            document.getElementById('txId').value = txId;
+            await verifyTransaction(txId);
+            document.getElementById('verifyForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize
+        if (checkAuth()) {
+            window.addEventListener('load', initWeb3);
+        }
+    </script>
+</body>
+</html>
