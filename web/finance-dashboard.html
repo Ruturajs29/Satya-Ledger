@@ -35,6 +35,12 @@
             color: #667eea;
         }
 
+        .navbar-brand img {
+            height: 36px;
+            vertical-align: middle;
+            margin-right: 12px;
+        }
+
         .navbar-user {
             display: flex;
             align-items: center;
@@ -270,6 +276,46 @@
             margin-bottom: 20px;
         }
 
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .btn-receipt {
+            padding: 8px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .btn-receipt:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
         @media (max-width: 768px) {
             .tx-details {
                 grid-template-columns: 1fr;
@@ -279,7 +325,10 @@
 </head>
 <body>
     <div class="navbar">
-        <div class="navbar-brand">🏛️ SatyaLedger</div>
+        <div class="navbar-brand">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Government of India">
+            SatyaLedger
+        </div>
         <div class="navbar-user">
             <div class="user-info">
                 <div class="user-name" id="userName">Finance Ministry</div>
@@ -311,7 +360,13 @@
         </div>
 
         <div class="card">
-            <h2 style="margin-bottom: 20px; color: #333;">📋 Pending Approvals</h2>
+            <h2 style="margin-bottom: 20px; color: #333;">📋 Transactions</h2>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterTransactions('pending')">Pending (<span id="filterPending">0</span>)</button>
+                <button class="filter-tab" onclick="filterTransactions('approved')">Approved (<span id="filterApproved">0</span>)</button>
+                <button class="filter-tab" onclick="filterTransactions('all')">All (<span id="filterAll">0</span>)</button>
+            </div>
 
             <div class="info-box">
                 <strong>ℹ️ Approval Process:</strong><br>
@@ -413,7 +468,7 @@
             }
         }
 
-        async function loadTransactions() {
+        async function loadTransactions(filter = 'pending') {
             const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
             const listDiv = document.getElementById('transactionList');
 
@@ -421,8 +476,8 @@
                 listDiv.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📭</div>
-                        <h3>No Pending Transactions</h3>
-                        <p>All transactions have been reviewed</p>
+                        <h3>No Transactions</h3>
+                        <p>No transactions available</p>
                     </div>
                 `;
                 return;
@@ -440,7 +495,32 @@
                 return { ...tx, voted };
             }));
 
-            listDiv.innerHTML = txWithStatus.map(tx => {
+            // Filter transactions
+            let filteredTx = txWithStatus;
+            if (filter === 'pending') {
+                filteredTx = txWithStatus.filter(tx => tx.approvals < 3);
+            } else if (filter === 'approved') {
+                filteredTx = txWithStatus.filter(tx => tx.approvals >= 3);
+            }
+
+            if (filteredTx.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Transactions</h3>
+                        <p>All transactions in this category have been reviewed</p>
+                    </div>
+                `;
+                document.getElementById('pendingCount').textContent = pending;
+                document.getElementById('approvedByMe').textContent = approvedByMe;
+                document.getElementById('totalApproved').textContent = totalApproved;
+                document.getElementById('filterPending').textContent = pending;
+                document.getElementById('filterApproved').textContent = totalApproved;
+                document.getElementById('filterAll').textContent = transactions.length;
+                return;
+            }
+
+            listDiv.innerHTML = filteredTx.map(tx => {
                 const progress = (tx.approvals / 3) * 100;
                 const isFinalized = tx.approvals >= 3;
                 
@@ -486,11 +566,18 @@
                             <span style="font-size: 0.9em; color: #666;">
                                 ${tx.voted ? '✓ You have approved this transaction' : 'Awaiting your approval'}
                             </span>
-                            <button class="btn-approve" 
-                                    onclick="approveTransaction('${tx.txId}')" 
-                                    ${tx.voted || isFinalized ? 'disabled' : ''}>
-                                ${tx.voted ? '✓ Approved' : 'Approve Transaction'}
-                            </button>
+                            <div>
+                                ${isFinalized ? `
+                                    <button class="btn-receipt" onclick="window.location.href='receipt.html?txId=${tx.txId}'">
+                                        📄 View Receipt
+                                    </button>
+                                ` : ''}
+                                <button class="btn-approve" 
+                                        onclick="approveTransaction('${tx.txId}')" 
+                                        ${tx.voted || isFinalized ? 'disabled' : ''}>
+                                    ${tx.voted ? '✓ Approved' : 'Approve Transaction'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -499,7 +586,16 @@
             document.getElementById('pendingCount').textContent = pending;
             document.getElementById('approvedByMe').textContent = approvedByMe;
             document.getElementById('totalApproved').textContent = totalApproved;
+            document.getElementById('filterPending').textContent = pending;
+            document.getElementById('filterApproved').textContent = totalApproved;
+            document.getElementById('filterAll').textContent = transactions.length;
         }
+
+                alert('✅ Transaction approved successfully!');
+                loadTransactions('pending');ll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            loadTransactions(filter);
+        
 
         async function approveTransaction(txId) {
             if (!confirm('Are you sure you want to approve this transaction?')) {

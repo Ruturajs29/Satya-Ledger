@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Education Ministry - SatyaLedger</title>
+    <title>Auditor General - SatyaLedger</title>
     <style>
         * {
             margin: 0;
@@ -181,8 +181,8 @@
 
         .ministry-badge {
             display: inline-block;
-            background: #ffc107;
-            color: #333;
+            background: #dc3545;
+            color: white;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 0.9em;
@@ -335,8 +335,8 @@
         </div>
         <div class="navbar-user">
             <div class="user-info">
-                <div class="user-name" id="userName">Education Ministry</div>
-                <div class="user-role">Transaction Approver</div>
+                <div class="user-name" id="userName">Auditor General</div>
+                <div class="user-role">Transaction Auditor</div>
             </div>
             <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
@@ -344,7 +344,7 @@
 
     <div class="container">
         <div class="header">
-            <h1>📚 Education Ministry Dashboard</h1>
+            <h1>🔍 Auditor General Dashboard</h1>
             <p>Review and approve pending transactions</p>
         </div>
 
@@ -384,9 +384,9 @@
                 • Once approved, you cannot revoke your vote
             </div>
 
-            <div style="background: #fffbec; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <strong>🏛️ Approving as: <span class="ministry-badge">Education Ministry</span></strong><br>
-                <small>Address: <span id="ministryAddress" style="font-family: monospace;">0xE7C431244397bc4DB389806d4931e16B978fC23F</span></small>
+            <div style="background: #ffe8e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <strong>🏛️ Approving as: <span class="ministry-badge">Auditor General</span></strong><br>
+                <small>Address: <span id="ministryAddress" style="font-family: monospace;">0x76F52BE2B49cc3466897865fa488dCa8B5cBa33b</span></small>
             </div>
 
             <div class="transaction-list" id="transactionList">
@@ -401,7 +401,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
     <script>
-        const EDUCATION_MINISTRY = "0xE7C431244397bc4DB389806d4931e16B978fC23F";
+        const AUDITOR_GENERAL = "0x76F52BE2B49cc3466897865fa488dCa8B5cBa33b";
         const CONTRACT_ADDRESS = "0xA33e479090a4858951ceCD3d62071B15E0a29291";
         
         let web3;
@@ -447,7 +447,7 @@
 
         // Check authentication
         function checkAuth() {
-            if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('userType') !== 'education') {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('userType') !== 'auditor') {
                 window.location.href = 'login.html';
                 return false;
             }
@@ -496,7 +496,7 @@
 
             // Get approval status for each transaction
             const txWithStatus = await Promise.all(transactions.map(async tx => {
-                const voted = tx.voters && tx.voters.includes('education');
+                const voted = tx.voters && tx.voters.includes('auditor');
                 const isApproved = tx.approvals >= 3;
                 
                 if (voted) approvedByMe++;
@@ -546,49 +546,50 @@
                                     ${tx.isApproved ? '✅ Fully Approved' : (tx.voted ? '✓ You Approved' : '⏳ Pending')}
                                 </span>
                             </div>
+                        </div>
 
-                            <div class="tx-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Beneficiary ID</span>
-                                    <span class="detail-value">${tx.beneficiaryId}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Amount</span>
-                                    <span class="detail-value">₹${tx.amount.toLocaleString()}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Created</span>
-                                    <span class="detail-value">${new Date(tx.timestamp).toLocaleDateString()}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Receipt Hash</span>
-                                    <span class="detail-value" style="font-family: monospace; font-size: 0.85em;">${tx.receiptHash.substring(0, 20)}...</span>
-                                </div>
+                        <div class="tx-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Beneficiary ID</span>
+                                <span class="detail-value">${tx.beneficiaryId}</span>
                             </div>
-
-                            <div>
-                                <strong>Approval Progress: ${tx.approvals}/3</strong>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${progress}%"></div>
-                                </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Amount</span>
+                                <span class="detail-value">₹${tx.amount.toLocaleString()}</span>
                             </div>
-
-                            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.9em; color: #666;">
-                                    ${tx.voted ? '✓ You have approved this transaction' : 'Awaiting your approval'}
-                                </span>
-                                <div>
-                                    <button class="btn-approve" 
-                                            onclick="approveTransaction('${tx.txId}')" 
-                                            ${tx.voted || tx.isApproved ? 'disabled' : ''}>
-                                        ${tx.voted ? '✓ Approved' : 'Approve Transaction'}
-                                    </button>
-                                    ${receiptButton}
-                                </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Created</span>
+                                <span class="detail-value">${new Date(tx.timestamp).toLocaleDateString()}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Receipt Hash</span>
+                                <span class="detail-value" style="font-family: monospace; font-size: 0.85em;">${tx.receiptHash.substring(0, 20)}...</span>
                             </div>
                         </div>
-                    `;
-                }).join('');
+
+                        <div>
+                            <strong>Approval Progress: ${tx.approvals}/3</strong>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.9em; color: #666;">
+                                ${tx.voted ? '✓ You have approved this transaction' : 'Awaiting your approval'}
+                            </span>
+                            <div>
+                                <button class="btn-approve" 
+                                        onclick="approveTransaction('${tx.txId}')" 
+                                        ${tx.voted || tx.isApproved ? 'disabled' : ''}>
+                                    ${tx.voted ? '✓ Approved' : 'Approve Transaction'}
+                                </button>
+                                ${receiptButton}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
             }
 
             document.getElementById('pendingCount').textContent = pendingCount;
@@ -625,7 +626,7 @@
             try {
                 // Send approval to blockchain
                 await contract.methods.approveTransaction(txId).send({ 
-                    from: EDUCATION_MINISTRY, 
+                    from: AUDITOR_GENERAL, 
                     gas: 300000 
                 });
 
@@ -636,7 +637,7 @@
                 if (txIndex !== -1) {
                     transactions[txIndex].approvals = (transactions[txIndex].approvals || 0) + 1;
                     transactions[txIndex].voters = transactions[txIndex].voters || [];
-                    transactions[txIndex].voters.push('education');
+                    transactions[txIndex].voters.push('auditor');
                     
                     if (transactions[txIndex].approvals >= 3) {
                         transactions[txIndex].status = 'Approved';

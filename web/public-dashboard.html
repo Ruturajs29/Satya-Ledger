@@ -35,6 +35,12 @@
             color: #667eea;
         }
 
+        .navbar-brand img {
+            height: 36px;
+            vertical-align: middle;
+            margin-right: 12px;
+        }
+
         .navbar-user {
             display: flex;
             align-items: center;
@@ -297,7 +303,11 @@
 </head>
 <body>
     <div class="navbar">
-        <div class="navbar-brand">🏛️ SatyaLedger</div>
+        <div class="navbar-brand">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Government of India">
+            SatyaLedger
+        </div>
+        <div style="font-size:0.95em; color:#222; font-weight:500; margin-left:10px; display:inline-block; vertical-align:middle;">Government of India</div>
         <div class="navbar-user">
             <div class="user-info">
                 <div class="user-name" id="userName">Public User</div>
@@ -356,7 +366,7 @@
         const MINISTRIES = {
             "0xdeF7c520781D097D23f20563111C266630e8Fe7f": "Finance Ministry",
             "0xb2eA23Ad706B701a359aDc5DAC5A7E7a8FEe96b0": "Welfare Ministry",
-            "0x76F52BE2B49cc3466897865fa488dCa8B5cBa33b": "Health Ministry",
+            "0x76F52BE2B49cc3466897865fa488dCa8B5cBa33b": "Auditor General",
             "0xE7C431244397bc4DB389806d4931e16B978fC23F": "Education Ministry"
         };
 
@@ -614,6 +624,7 @@
                                             style="padding: 5px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
                                         View Details
                                     </button>
+                                    ${tx.approvals >= 3 ? `<button onclick="window.open('receipt.html?txId=${tx.txId}', '_blank')" style="padding: 5px 15px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 8px;">View Receipt</button>` : ''}
                                 </td>
                             </tr>
                         `).join('')}

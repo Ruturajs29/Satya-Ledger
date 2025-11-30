@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Receipt - SatyaLedger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .receipt-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .receipt-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #28a745, #20c997, #17a2b8);
+        }
+
+        .receipt-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .receipt-header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .govt-seal {
+            width: 80px;
+            height: 80px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .receipt-status {
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .receipt-body {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+            word-break: break-all;
+        }
+
+        .info-value.highlight {
+            font-size: 1.3em;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .qr-section {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .qr-code {
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            display: inline-block;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .approval-timeline {
+            position: relative;
+            padding-left: 40px;
+            margin-top: 20px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 30px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .timeline-item.approved::before {
+            background: #28a745;
+            box-shadow: 0 0 0 2px #28a745;
+        }
+
+        .timeline-item.pending::before {
+            background: #ffc107;
+            box-shadow: 0 0 0 2px #ffc107;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 24px;
+            width: 2px;
+            height: calc(100% - 16px);
+            background: #e0e0e0;
+        }
+
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        .timeline-ministry {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .timeline-status {
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .timeline-status.approved {
+            color: #28a745;
+        }
+
+        .timeline-status.pending {
+            color: #ffc107;
+        }
+
+        .verification-box {
+            background: #e8f5e9;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .verification-box h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        .verification-steps {
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .verification-steps li {
+            margin-bottom: 8px;
+        }
+
+        .receipt-footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 3px solid #e0e0e0;
+        }
+
+        .footer-note {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-print {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-download {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .btn-container {
+                display: none;
+            }
+            .receipt-container {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            .info-label {
+                font-weight: 700;
+            }
+        }
+
+        .stamp {
+            position: absolute;
+            right: 40px;
+            bottom: 40px;
+            width: 120px;
+            height: 120px;
+            border: 3px solid #dc3545;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-15deg);
+            opacity: 0.8;
+        }
+
+        .stamp-text {
+            color: #dc3545;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .blockchain-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container" id="receipt">
+        <div class="receipt-header">
+            <!-- Government of India Logo -->
+            <div style="text-align:center; margin-bottom: 20px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Government of India" style="height: 140px;">
+            </div>
+                        <div style="text-align:center; font-size:1.1em; font-weight:600; margin-bottom: 10px;">
+                <div style="font-size:1.2em;">Government of India</div>
+            <h1>OFFICIAL RECEIPT</h1>
+            <p class="subtitle">Government of India - Subsidy Payment Confirmation</p>
+            <p class="subtitle">SatyaLedger Blockchain Verification System</p>
+            </div>
+        </div>
+
+        <div class="receipt-status">
+            ✅ TRANSACTION APPROVED - BLOCKCHAIN VERIFIED
+        </div>
+
+        <div class="receipt-body">
+            <div class="section">
+                <h2 class="section-title">
+                    📄 Transaction Details
+                </h2>
+                <div class="info-grid">
+                    <div class="info-label">Receipt Number:</div>
+                    <div class="info-value" id="receiptNumber">-</div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-label">Transaction ID:</div>
+                    <div class="info-value" id="txId" style="font-family: monospace; font-size: 0.85em;">-</div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-label">Date & Time:</div>
+                    <div class="info-value" id="txDate">-</div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-label">Blockchain Hash:</div>
+                    <div class="info-value" id="receiptHash" style="font-family: monospace; font-size: 0.85em;">-</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">
+                    👤 Beneficiary Information
+                </h2>
+                <div class="info-grid">
+                    <div class="info-label">Beneficiary ID:</div>
+                    <div class="info-value" id="beneficiaryId">-</div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-label">Scheme Name:</div>
+                    <div class="info-value" id="schemeName">-</div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-label">Amount Disbursed:</div>
+                    <div class="info-value highlight" id="amount">-</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">
+                    🗳️ Ministry Approvals
+                </h2>
+                <div class="approval-timeline" id="approvalTimeline">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="qr-section">
+                <h2 class="section-title" style="border-bottom: none; justify-content: center;">
+                    📱 QR Code Verification
+                </h2>
+                <p style="color: #666; margin-bottom: 10px;">Scan to verify transaction on blockchain</p>
+                <div class="qr-code" id="qrCode"></div>
+                <div class="blockchain-badge">
+                    🔗 Verified on Ethereum Blockchain
+                </div>
+            </div>
+
+            <div class="verification-box">
+                <h3>🔐 How to Verify This Receipt</h3>
+                <ol class="verification-steps">
+                    <li>Scan the QR code above or visit the SatyaLedger verification portal</li>
+                    <li>Enter the Transaction ID shown on this receipt</li>
+                    <li>View complete transaction details on the blockchain</li>
+                    <li>Verify ministry approvals and receipt hash match</li>
+                    <li>Confirm transaction authenticity independently</li>
+                </ol>
+            </div>
+
+            <div style="position: relative; min-height: 150px; margin-top: 30px;">
+                <div class="stamp">
+                    <div class="stamp-text">
+                        APPROVED<br>
+                        <small id="stampDate">-</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            <p class="footer-note">
+                This is an official government receipt generated and verified on the SatyaLedger blockchain system.
+                <br>The transaction has been approved by the required quorum of ministries and is immutably recorded on the blockchain.
+            </p>
+            <p class="footer-note" style="font-size: 0.8em; margin-top: 10px;">
+                <strong>Issuing Authority:</strong> Welfare Ministry, Government of India<br>
+                <strong>Verification Portal:</strong> https://satyaledger.gov.in/verify
+            </p>
+            <div class="btn-container">
+                <button class="btn btn-print" onclick="window.print()">🖨️ Print Receipt</button>
+                <button class="btn btn-download" onclick="downloadPDF()">📥 Download PDF</button>
+                <button class="btn btn-back" onclick="goBack()">← Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        // Get transaction ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const txId = urlParams.get('txId');
+
+        if (!txId) {
+            alert('No transaction ID provided');
+            window.location.href = 'login.html';
+        }
+
+        // Load transaction data
+        function loadReceipt() {
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            const tx = transactions.find(t => t.txId === txId);
+
+            if (!tx) {
+                alert('Transaction not found');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (tx.approvals < 3) {
+                alert('Transaction not yet fully approved. Receipt can only be generated for approved transactions.');
+                window.history.back();
+                return;
+            }
+
+            // Populate receipt
+            const receiptNumber = 'REC-' + txId.substring(2, 12).toUpperCase();
+            document.getElementById('receiptNumber').textContent = receiptNumber;
+            document.getElementById('txId').textContent = txId;
+            document.getElementById('txDate').textContent = new Date(tx.timestamp).toLocaleString('en-IN', {
+                dateStyle: 'full',
+                timeStyle: 'long'
+            });
+            document.getElementById('receiptHash').textContent = tx.receiptHash;
+            document.getElementById('beneficiaryId').textContent = tx.beneficiaryId;
+            document.getElementById('schemeName').textContent = tx.schemeName;
+            document.getElementById('amount').textContent = '₹' + tx.amount.toLocaleString('en-IN');
+            document.getElementById('stampDate').textContent = new Date(tx.timestamp).toLocaleDateString('en-IN');
+
+            // Ministry approvals (excluding welfare as they are the creator)
+            const ministries = [
+                { name: 'Finance Ministry', key: 'finance' },
+                { name: 'Auditor General', key: 'auditor' },
+                { name: 'Education Ministry', key: 'education' }
+            ];
+
+            const timelineHTML = ministries.map(ministry => {
+                const approved = tx.voters && tx.voters.includes(ministry.key);
+                return `
+                    <div class="timeline-item ${approved ? 'approved' : 'pending'}">
+                        <div class="timeline-ministry">${ministry.name}</div>
+                        <div class="timeline-status ${approved ? 'approved' : 'pending'}">
+                            ${approved ? '✅ Approved' : '⏳ Pending'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('approvalTimeline').innerHTML = timelineHTML;
+
+            // Generate QR Code
+            const baseUrl = window.location.origin + window.location.pathname.replace('receipt.html', '');
+            const verificationUrl = `${baseUrl}public-dashboard.html?verify=${txId}`;
+            
+            // Clear any existing QR code
+            const qrContainer = document.getElementById('qrCode');
+            qrContainer.innerHTML = '';
+            
+            new QRCode(qrContainer, {
+                text: verificationUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('receipt');
+            const opt = {
+                margin: 0.5,
+                filename: `SatyaLedger-Receipt-${txId.substring(2, 12)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function goBack() {
+            const userType = sessionStorage.getItem('userType');
+            if (userType) {
+                window.location.href = `${userType}-dashboard.html`;
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load receipt on page load
+        window.addEventListener('load', loadReceipt);
+    </script>
+</body>
+</html>

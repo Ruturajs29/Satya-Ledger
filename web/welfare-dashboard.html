@@ -35,6 +35,12 @@
             color: #667eea;
         }
 
+        .navbar-brand img {
+            height: 36px;
+            vertical-align: middle;
+            margin-right: 12px;
+        }
+
         .navbar-user {
             display: flex;
             align-items: center;
@@ -252,11 +258,77 @@
             background: #d4edda;
             color: #155724;
         }
+
+        .tx-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-receipt {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-receipt:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .filter-tab:hover {
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <div class="navbar-brand">🏛️ SatyaLedger</div>
+        <div class="navbar-brand">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Government of India">
+            SatyaLedger
+        </div>
         <div class="navbar-user">
             <div class="user-info">
                 <div class="user-name" id="userName">Welfare Ministry</div>
@@ -340,7 +412,14 @@
         </div>
 
         <div class="card">
-            <h2 style="margin-bottom: 20px; color: #333;">📜 Recent Transactions</h2>
+            <h2 style="margin-bottom: 20px; color: #333;">📜 Transaction History</h2>
+            
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterTransactions('all')">All (<span id="countAll">0</span>)</button>
+                <button class="filter-tab" onclick="filterTransactions('pending')">Pending (<span id="countPending">0</span>)</button>
+                <button class="filter-tab" onclick="filterTransactions('approved')">Approved (<span id="countApproved">0</span>)</button>
+            </div>
+
             <div class="transaction-history" id="transactionHistory">
                 <p style="text-align: center; color: #999; padding: 30px;">No transactions created yet</p>
             </div>
@@ -480,14 +559,19 @@
                 loadTransactionHistory();
 
             } catch (error) {
-                showResult('error', `❌ Transaction Failed: ${error.message}`);
+                showResult('error', `
+                    <h3>❌ Transaction Creation Failed</h3>
+                    <p>${error.message}</p>
+                `);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Transaction';
             }
         });
 
-        function loadTransactionHistory() {
+        let currentFilter = 'all';
+
+        function loadTransactionHistory(filter = 'all') {
             const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
             const historyDiv = document.getElementById('transactionHistory');
 
@@ -498,33 +582,88 @@
 
             let pending = 0, approved = 0;
 
-            historyDiv.innerHTML = transactions.reverse().map(tx => {
-                const isApproved = tx.approvals >= 3;
-                if (isApproved) approved++; else pending++;
+            // Count transactions
+            transactions.forEach(tx => {
+                if (tx.approvals >= 3) approved++; else pending++;
+            });
 
-                return `
-                    <div class="tx-item">
-                        <div class="tx-header">
-                            <div>
-                                <strong>${tx.schemeName}</strong><br>
-                                <span class="tx-id">ID: ${tx.txId}</span>
+            // Filter transactions
+            let filteredTx = transactions;
+            if (filter === 'pending') {
+                filteredTx = transactions.filter(tx => tx.approvals < 3);
+            } else if (filter === 'approved') {
+                filteredTx = transactions.filter(tx => tx.approvals >= 3);
+            }
+
+            if (filteredTx.length === 0) {
+                historyDiv.innerHTML = `<p style="text-align: center; color: #999; padding: 30px;">No ${filter} transactions</p>`;
+            } else {
+                historyDiv.innerHTML = filteredTx.reverse().map(tx => {
+                    const isApproved = tx.approvals >= 3;
+                    const date = new Date(tx.timestamp).toLocaleDateString();
+
+                    return `
+                        <div class="tx-item" data-status="${isApproved ? 'approved' : 'pending'}">
+                            <div class="tx-header">
+                                <div>
+                                    <strong style="font-size: 1.1em;">${tx.schemeName}</strong><br>
+                                    <span class="tx-id">ID: ${tx.txId.substring(0, 20)}...</span>
+                                </div>
+                                <span class="status-badge ${isApproved ? 'status-approved' : 'status-pending'}">
+                                    ${isApproved ? '✅ Approved' : '⏳ Pending'}
+                                </span>
                             </div>
-                            <span class="status-badge ${isApproved ? 'status-approved' : 'status-pending'}">
-                                ${isApproved ? '✅ Approved' : '⏳ Pending'}
-                            </span>
+                            <div style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
+                                <strong>Beneficiary:</strong> ${tx.beneficiaryId} | 
+                                <strong>Amount:</strong> ₹${tx.amount.toLocaleString()} | 
+                                <strong>Date:</strong> ${date}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 0.9em;">
+                                    <strong>Approvals:</strong> ${tx.approvals}/3
+                                    ${tx.approvals > 0 ? `<span style="color: #28a745;"> (${tx.voters ? tx.voters.join(', ') : ''})</span>` : ''}
+                                </div>
+                                <div class="tx-actions">
+                                    ${isApproved ? `
+                                        <button class="btn-small btn-receipt" onclick="viewReceipt('${tx.txId}')">
+                                            📄 View Receipt
+                                        </button>
+                                    ` : ''}
+                                    <button class="btn-small btn-view" onclick="viewDetails('${tx.txId}')">
+                                        👁️ Details
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div style="color: #666; font-size: 0.9em;">
-                            <strong>Beneficiary:</strong> ${tx.beneficiaryId} | 
-                            <strong>Amount:</strong> ₹${tx.amount} |
-                            <strong>Approvals:</strong> ${tx.approvals}/3
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            }
 
+            // Update stats
             document.getElementById('totalCreated').textContent = transactions.length;
             document.getElementById('pendingCount').textContent = pending;
             document.getElementById('approvedCount').textContent = approved;
+            document.getElementById('countAll').textContent = transactions.length;
+            document.getElementById('countPending').textContent = pending;
+            document.getElementById('countApproved').textContent = approved;
+        }
+
+        function filterTransactions(filter) {
+            currentFilter = filter;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            loadTransactionHistory(filter);
+        }
+
+        function viewReceipt(txId) {
+            window.open(`receipt.html?txId=${txId}`, '_blank');
+        }
+
+        function viewDetails(txId) {
+            window.open(`public-dashboard.html?verify=${txId}`, '_blank');
         }
 
         function showResult(type, message) {

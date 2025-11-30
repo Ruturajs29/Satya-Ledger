@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Ministry - SatyaLedger</title>
+    <title>Finance Ministry - SatyaLedger</title>
     <style>
         * {
             margin: 0;
@@ -131,7 +131,7 @@
 
         .ministry-badge {
             display: inline-block;
-            background: #dc3545;
+            background: #17a2b8;
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
@@ -270,6 +270,46 @@
             margin-bottom: 20px;
         }
 
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .btn-receipt {
+            padding: 8px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .btn-receipt:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
         @media (max-width: 768px) {
             .tx-details {
                 grid-template-columns: 1fr;
@@ -282,7 +322,7 @@
         <div class="navbar-brand">🏛️ SatyaLedger</div>
         <div class="navbar-user">
             <div class="user-info">
-                <div class="user-name" id="userName">Health Ministry</div>
+                <div class="user-name" id="userName">Finance Ministry</div>
                 <div class="user-role">Transaction Approver</div>
             </div>
             <button class="btn-logout" onclick="logout()">Logout</button>
@@ -291,7 +331,7 @@
 
     <div class="container">
         <div class="header">
-            <h1>🏥 Health Ministry Dashboard</h1>
+            <h1>💰 Finance Ministry Dashboard</h1>
             <p>Review and approve pending transactions</p>
         </div>
 
@@ -311,7 +351,13 @@
         </div>
 
         <div class="card">
-            <h2 style="margin-bottom: 20px; color: #333;">📋 Pending Approvals</h2>
+            <h2 style="margin-bottom: 20px; color: #333;">📋 Transactions</h2>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterTransactions('pending')">Pending (<span id="filterPending">0</span>)</button>
+                <button class="filter-tab" onclick="filterTransactions('approved')">Approved (<span id="filterApproved">0</span>)</button>
+                <button class="filter-tab" onclick="filterTransactions('all')">All (<span id="filterAll">0</span>)</button>
+            </div>
 
             <div class="info-box">
                 <strong>ℹ️ Approval Process:</strong><br>
@@ -321,9 +367,9 @@
                 • Once approved, you cannot revoke your vote
             </div>
 
-            <div style="background: #ffe8e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <strong>🏛️ Approving as: <span class="ministry-badge">Health Ministry</span></strong><br>
-                <small>Address: <span id="ministryAddress" style="font-family: monospace;">0x76F52BE2B49cc3466897865fa488dCa8B5cBa33b</span></small>
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <strong>🏛️ Approving as: <span class="ministry-badge">Finance Ministry</span></strong><br>
+                <small>Address: <span id="ministryAddress" style="font-family: monospace;">0xdeF7c520781D097D23f20563111C266630e8Fe7f</span></small>
             </div>
 
             <div class="transaction-list" id="transactionList">
@@ -338,7 +384,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
     <script>
-        const HEALTH_MINISTRY = "0x76F52BE2B49cc3466897865fa488dCa8B5cBa33b";
+        const FINANCE_MINISTRY = "0xdeF7c520781D097D23f20563111C266630e8Fe7f";
         const CONTRACT_ADDRESS = "0xA33e479090a4858951ceCD3d62071B15E0a29291";
         
         let web3;
@@ -384,7 +430,7 @@
 
         // Check authentication
         function checkAuth() {
-            if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('userType') !== 'health') {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('userType') !== 'finance') {
                 window.location.href = 'login.html';
                 return false;
             }
@@ -413,7 +459,7 @@
             }
         }
 
-        async function loadTransactions() {
+        async function loadTransactions(filter = 'pending') {
             const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
             const listDiv = document.getElementById('transactionList');
 
@@ -421,8 +467,8 @@
                 listDiv.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📭</div>
-                        <h3>No Pending Transactions</h3>
-                        <p>All transactions have been reviewed</p>
+                        <h3>No Transactions</h3>
+                        <p>No transactions available</p>
                     </div>
                 `;
                 return;
@@ -432,7 +478,7 @@
 
             // Get approval status for each transaction
             const txWithStatus = await Promise.all(transactions.map(async tx => {
-                const voted = tx.voters && tx.voters.includes('health');
+                const voted = tx.voters && tx.voters.includes('finance');
                 if (voted) approvedByMe++;
                 if (tx.approvals >= 3) totalApproved++;
                 else if (!voted) pending++;
@@ -440,7 +486,32 @@
                 return { ...tx, voted };
             }));
 
-            listDiv.innerHTML = txWithStatus.map(tx => {
+            // Filter transactions
+            let filteredTx = txWithStatus;
+            if (filter === 'pending') {
+                filteredTx = txWithStatus.filter(tx => tx.approvals < 3);
+            } else if (filter === 'approved') {
+                filteredTx = txWithStatus.filter(tx => tx.approvals >= 3);
+            }
+
+            if (filteredTx.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Transactions</h3>
+                        <p>All transactions in this category have been reviewed</p>
+                    </div>
+                `;
+                document.getElementById('pendingCount').textContent = pending;
+                document.getElementById('approvedByMe').textContent = approvedByMe;
+                document.getElementById('totalApproved').textContent = totalApproved;
+                document.getElementById('filterPending').textContent = pending;
+                document.getElementById('filterApproved').textContent = totalApproved;
+                document.getElementById('filterAll').textContent = transactions.length;
+                return;
+            }
+
+            listDiv.innerHTML = filteredTx.map(tx => {
                 const progress = (tx.approvals / 3) * 100;
                 const isFinalized = tx.approvals >= 3;
                 
@@ -486,11 +557,18 @@
                             <span style="font-size: 0.9em; color: #666;">
                                 ${tx.voted ? '✓ You have approved this transaction' : 'Awaiting your approval'}
                             </span>
-                            <button class="btn-approve" 
-                                    onclick="approveTransaction('${tx.txId}')" 
-                                    ${tx.voted || isFinalized ? 'disabled' : ''}>
-                                ${tx.voted ? '✓ Approved' : 'Approve Transaction'}
-                            </button>
+                            <div>
+                                ${isFinalized ? `
+                                    <button class="btn-receipt" onclick="window.location.href='receipt.html?txId=${tx.txId}'">
+                                        📄 View Receipt
+                                    </button>
+                                ` : ''}
+                                <button class="btn-approve" 
+                                        onclick="approveTransaction('${tx.txId}')" 
+                                        ${tx.voted || isFinalized ? 'disabled' : ''}>
+                                    ${tx.voted ? '✓ Approved' : 'Approve Transaction'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -499,7 +577,16 @@
             document.getElementById('pendingCount').textContent = pending;
             document.getElementById('approvedByMe').textContent = approvedByMe;
             document.getElementById('totalApproved').textContent = totalApproved;
+            document.getElementById('filterPending').textContent = pending;
+            document.getElementById('filterApproved').textContent = totalApproved;
+            document.getElementById('filterAll').textContent = transactions.length;
         }
+
+                alert('✅ Transaction approved successfully!');
+                loadTransactions('pending');ll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            loadTransactions(filter);
+        
 
         async function approveTransaction(txId) {
             if (!confirm('Are you sure you want to approve this transaction?')) {
@@ -509,7 +596,7 @@
             try {
                 // Send approval to blockchain
                 await contract.methods.approveTransaction(txId).send({ 
-                    from: HEALTH_MINISTRY, 
+                    from: FINANCE_MINISTRY, 
                     gas: 300000 
                 });
 
@@ -520,7 +607,7 @@
                 if (txIndex !== -1) {
                     transactions[txIndex].approvals = (transactions[txIndex].approvals || 0) + 1;
                     transactions[txIndex].voters = transactions[txIndex].voters || [];
-                    transactions[txIndex].voters.push('health');
+                    transactions[txIndex].voters.push('finance');
                     
                     if (transactions[txIndex].approvals >= 3) {
                         transactions[txIndex].status = 'Approved';
