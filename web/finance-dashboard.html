@@ -590,12 +590,20 @@
             document.getElementById('filterApproved').textContent = totalApproved;
             document.getElementById('filterAll').textContent = transactions.length;
         }
+        try
+               { alert('✅ Transaction approved successfully!');
+                loadTransactions('pending');}
 
-                alert('✅ Transaction approved successfully!');
-                loadTransactions('pending');ll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+        catch (error) {
+                alert('❌ Approval failed: ' + error.message);
+            }
+        
+
+        function filterTransactions(filter) {
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
             loadTransactions(filter);
-        
+        }
 
         async function approveTransaction(txId) {
             if (!confirm('Are you sure you want to approve this transaction?')) {

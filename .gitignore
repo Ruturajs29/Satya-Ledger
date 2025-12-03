@@ -11,7 +11,7 @@ build/
 .env
 .env.local
 .env.production
-
+Doc/
 # Private keys and sensitive data
 *.key
 *.pem
